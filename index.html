@@ -5,399 +5,349 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>我們的聖誕婚禮邀請</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
-            background-color: #F0E6D2; 
+        /* 修正 2: 深聖誕紅背景 */
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* 深邃聖誕紅與黑的漸變背景 */
+            background: linear-gradient(135deg, #3A0202 0%, #1A0000 70%); /* 背景調得更深 */
             font-family: "Microsoft JhengHei", sans-serif;
-            touch-action: none; 
+            touch-action: none;
         }
         canvas { display: block; }
         
         /* 載入畫面 */
         #loading-overlay {
-            position: absolute;
-            top: 0; left: 0;
+            position: absolute; top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: #F0E6D2;
-            color: #880000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5em;
-            z-index: 100;
-            transition: opacity 0.8s;
+            background: #1A0000;
+            color: #FFD700;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.6em; font-weight: bold;
+            z-index: 100; transition: opacity 1s;
         }
 
         /* 倒數計時器 */
         #countdown {
-            position: absolute;
-            top: 10px;
-            width: 100%;
+            position: absolute; top: 15px; width: 100%;
             text-align: center;
-            color: #880000;
-            font-weight: bold;
-            font-size: 1.1em;
-            z-index: 10;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 5px;
+            color: #FFD700; font-weight: bold; font-size: 1.2em;
+            z-index: 10; padding: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px; text-shadow: 0 0 10px #FFD700;
         }
+
+        /* 婚宴資訊按鈕 (取代點擊卡片) */
+        #info-btn {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%);
+            /* 聖誕金 */
+            background: #FFD700;
+            color: #8B0000;
+            padding: 14px 40px; border-radius: 50px;
+            font-weight: bold; cursor: pointer; z-index: 90;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7), 0 0 15px #FFD700; /* 金色發光 */
+            transition: 0.3s;
+            font-size: 1.1em;
+        }
+        #info-btn:hover { background: #FFEA00; transform: translateX(-50%) scale(1.05); }
 
         /* 彈出資訊視窗 */
         #info-modal {
-            position: absolute;
-            top: 0; left: 0;
+            position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none; 
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
+            background: rgba(0, 0, 0, 0.88);
+            display: none; justify-content: center; align-items: center;
+            z-index: 80; backdrop-filter: blur(6px);
+            opacity: 0; transition: opacity 0.3s; 
         }
+        #info-modal.show { opacity: 1; } 
+        
         #info-content {
-            background: #F5F5DC;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 80%;
-            text-align: left;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, #FFF8E7, #F5F5DC);
+            padding: 35px; border-radius: 15px;
+            max-width: 88%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             color: #333;
+            border: 3px solid #FFD700; position: relative;
+        }
+        .close-btn {
+            position: absolute; top: 8px; right: 15px;
+            font-size: 2.8em; font-weight: bold; cursor: pointer;
+            color: #880000;
         }
         #info-content h3 {
-            color: #880000;
-            border-bottom: 2px solid #E6C35C;
-            padding-bottom: 5px;
-            margin-top: 0;
+            color: #880000; text-align: center;
+            border-bottom: 3px solid #FFD700;
+            padding-bottom: 8px; margin: 0 0 20px 0;
+            font-size: 1.6em;
         }
         #info-content p {
             margin: 10px 0;
             font-size: 1.1em;
         }
         #info-content a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .close-btn {
-            float: right;
-            font-size: 2em;
-            font-weight: bold;
-            cursor: pointer;
             color: #880000;
+            text-decoration: underline;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-
-<div id="loading-overlay">載入極致卡片材質與聖誕特效中...</div>
+<div id="loading-overlay">聖誕喜帖載入中...</div>
 <div id="countdown"></div>
+<div id="info-btn">點我查看婚宴資訊</div>
 
 <div id="info-modal">
     <div id="info-content">
         <span class="close-btn">×</span>
-        <h3>📍 婚宴資訊詳情 📍</h3>
-        
+        <h3>婚宴資訊詳情</h3>
         <p><strong>地點｜</strong>晶宴・日光香頌</p>
         <p><strong>地址｜</strong>台北市中山區民生東路三段 8 號 1 樓</p>
-        <p>
-            <a href="https://maps.app.goo.gl/6mG21w1w3n3kE9499" target="_blank">📌 Google 地圖連結 (地點)</a>
-        </p>
-
-        <hr style="border-top: 1px solid #ccc; margin: 15px 0;">
-
-        <p><strong>停車資訊｜</strong>24TPS 永固便利停車場-民生站</p>
-        <p><strong>停車場地址｜</strong>10491 臺北市中山區民生東路三段 8 號 B2 樓</p>
-        <p>
-            <a href="https://maps.app.goo.gl/x7J9qFbLaP9hGD8NA" target="_blank">🅿️ Google 地圖連結 (停車場)</a>
-        </p>
-        
+        <p><a href="https://maps.app.goo.gl/6mG21w1w3n3kE9499" target="_blank">📌 Google 地圖（會場）</a></p>
+        <hr style="margin:20px 0">
+        <p><strong>停車｜</strong>24TPS 永固便利停車場</p>
+        <p><strong>地址｜</strong>10491 臺北市中山區民生東路三段 8 號 B2</p>
+        <p><a href="https://maps.app.goo.gl/x7J9qFbLaP9hGD8NA" target="_blank">🅿️ Google 地圖（停車場）</a></p>
     </div>
 </div>
 
 <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
     }
+}
 </script>
-
 <script type="module">
     import * as THREE from 'three';
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-    let scene, camera, renderer, controls, cardMesh;
-    const loadingOverlay = document.getElementById('loading-overlay');
+    const scene = new THREE.Scene();
+    // 深聖誕紅霧效
+    scene.fog = new THREE.FogExp2(0x3A0202, 0.018); 
+    const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1000);
+    camera.position.set(0,0,10);
 
-    // 婚禮日期 (目標：12/25 12:00) - 請根據實際年份修改
-    const weddingDate = new Date("December 25, 2025 12:00:00").getTime(); 
+    const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(devicePixelRatio);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // 稍微提高一點曝光，讓背面的反光能顯現
+    renderer.toneMappingExposure = 1.5; 
+    document.body.appendChild(renderer.domElement);
 
-    // 卡片尺寸：436x297 (橫式)
-    const cardWidth = 4.36;
-    const cardHeight = 2.97;
-    const cardDepth = 0.015; 
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; controls.minDistance = 4; controls.maxDistance = 15; controls.enablePan = false;
 
-    // 貼圖載入追蹤
-    let texturesLoaded = 0;
-    // 總共 5 個貼圖：正面圖、正面 HDR、背面圖、背面 HDR、HDR環境光
-    const totalTextures = 5;
-    let frontBaseTexture, frontHdrTexture, backBaseTexture, backHdrTexture, envMapTexture;
-    
-    // 聖誕特效
-    let snowflakeSystem;
-    const SNOWFLAKE_COUNT = 500;
-    const SNOWFLAKE_RANGE = 15;
+    // 環境光
+    scene.add(new THREE.AmbientLight(0xffffff, 1.2)); 
 
-    // --- 初始化函數 ---
-    init();
-    startCountdown(); 
+    const loading = document.getElementById('loading-overlay');
+    const weddingDate = new Date("December 25, 2025 12:00:00").getTime();
 
-    function init() {
-        scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0xF0E6D2, 0.015);
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 10);
-        
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.useLegacyLights = false;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.0;
-        document.body.appendChild(renderer.domElement);
+    // ==================== 檔案路徑 (最終確認版本) ====================
+    const FILE_PATHS = {
+        FRONT_HDR: './textures/photo_front_hdr.jpg',
+        BACK_BASE: './photo_back.png',
+        BACK_HDR: './textures/photo_back_hdr.jpg',
+        ENV_MAP: './textures/hdr.jpg'
+    };
 
-        controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.minDistance = 4;
-        controls.maxDistance = 15;
-        controls.enablePan = false;
+    const loader = new THREE.TextureLoader();
+    let loaded = 0, total = 4;
+    let frontHdrTex, backBaseTex, backHdrTex, envMap;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-        
-        createSnowflakes();
-        loadAllTextures();
+    const dummyTexture = new THREE.Texture();
+    dummyTexture.colorSpace = THREE.SRGBColorSpace;
 
-        window.addEventListener('resize', onWindowResize);
-        window.addEventListener('click', onCardClick, false);
-        document.querySelector('.close-btn').onclick = () => {
-            document.getElementById('info-modal').style.display = 'none';
-        };
-    }
 
-    // --- 貼圖載入完成檢查 ---
-    function textureReady(name) {
-        texturesLoaded++;
-        if (texturesLoaded === totalTextures) {
-            createCard(frontBaseTexture, frontHdrTexture, backBaseTexture, backHdrTexture);
+    function allLoaded() {
+        if (++loaded === total) {
+            createCard();
             animateIntro();
-            loadingOverlay.style.opacity = 0;
-            setTimeout(() => loadingOverlay.style.display = 'none', 800);
+            loading.style.opacity = 0;
+            setTimeout(()=>loading.style.display='none',1000);
+            animate(); 
         }
     }
-    
-    // --- 載入所有外部貼圖 ---
-    function loadAllTextures() {
-        const textureLoader = new THREE.TextureLoader();
-        
-        // 1. 正面 Base Color
-        textureLoader.load('./photo_front.png', (texture) => { frontBaseTexture = texture; texture.colorSpace = THREE.SRGBColorSpace; textureReady('frontBaseTexture'); }, undefined, () => { console.error('front.png failed.'); frontBaseTexture = new THREE.Texture(); textureReady('frontBaseTexture'); });
-        
-        // 2. 正面 HDR (燙金/壓紋貼圖)
-        textureLoader.load('./textures/photo_front_hdr.jpg', (texture) => { frontHdrTexture = texture; textureReady('frontHdrTexture'); }, undefined, () => { console.error('front_hdr.jpg failed.'); frontHdrTexture = new THREE.Texture(); textureReady('frontHdrTexture'); });
 
-        // 3. 背面 Base Color
-        textureLoader.load('./photo_back.png', (texture) => { backBaseTexture = texture; texture.colorSpace = THREE.SRGBColorSpace; textureReady('backBaseTexture'); }, undefined, () => { console.error('back.png failed.'); backBaseTexture = new THREE.Texture(); textureReady('backBaseTexture'); });
-        
-        // 4. 背面 HDR (珍珠箔反光貼圖)
-        textureLoader.load('./textures/photo_back_hdr.jpg', (texture) => { backHdrTexture = texture; textureReady('backHdrTexture'); }, undefined, () => { console.error('back_hdr.jpg failed.'); backHdrTexture = new THREE.Texture(); textureReady('backHdrTexture'); });
-
-        // 5. HDR 環境貼圖
-        textureLoader.load('./textures/hdr.jpg', (texture) => {
-            const pmremGenerator = new THREE.PMREMGenerator(renderer);
-            pmremGenerator.compileEquirectangularShader();
-            envMapTexture = pmremGenerator.fromEquirectangular(texture).texture;
-            scene.environment = envMapTexture;
-            texture.dispose();
-            pmremGenerator.dispose();
-            textureReady('envMapTexture');
-        }, undefined, () => { console.error('hdr.jpg failed.'); envMapTexture = null; textureReady('envMapTexture'); });
-    }
-    
-    // --- 創建卡片 ---
-    function createCard(frontMap, frontHdr, backMap, backHdr) {
-        const geometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
-        
-        // I. 側面材質 (金色邊緣)
-        const sideMaterial = new THREE.MeshPhysicalMaterial({ color: 0xFFD700, metalness: 1.0, roughness: 0.1, });
-
-        // II. 正面材質 (紅色霧面紙張 + 凹陷燙金)
-        // 貼圖邏輯：假設 front_hdr.jpg 中黑色區域是燙金，白色區域是紙張
-        const frontMaterial = new THREE.MeshPhysicalMaterial({
-            map: frontMap,            // 顏色貼圖
-            color: 0x8A0000,          // 強制基底顏色為深紅
-            
-            // 燙金金屬：圖中黑(0) -> 高金屬(1)，白(1) -> 無金屬(0)
-            metalnessMap: frontHdr,   
-            metalness: 1.0,           
-
-            // 燙金光滑：圖中黑(0) -> 極度光滑(0)，白(1) -> 粗糙紙張(1)
-            roughnessMap: frontHdr,
-            roughness: 0.8,           
-            
-            // 凹陷效果：黑色燙金區域看起來是壓下去的
-            bumpMap: frontHdr,        
-            bumpScale: -0.008         // 負值模擬凹陷 (壓燙金)
+    const loadTexture = (path, name, successCallback, isEnvMap = false) => {
+        loader.load(path, (texture) => {
+            if (isEnvMap) {
+                const pmrem = new THREE.PMREMGenerator(renderer);
+                pmrem.compileEquirectangularShader();
+                envMap = pmrem.fromEquirectangular(texture).texture;
+                scene.environment = envMap;
+                texture.dispose(); pmrem.dispose();
+            } else if (successCallback) {
+                successCallback(texture);
+            }
+            allLoaded();
+        }, undefined, (err) => {
+            console.error(`Error loading ${name} from ${path}. Using dummy texture.`, err);
+            if (!isEnvMap && successCallback) {
+                 successCallback(dummyTexture);
+            } else if (isEnvMap) {
+                scene.add(new THREE.AmbientLight(0xffffff, 1.5)); 
+            }
+            allLoaded();
         });
-        
-        // III. 背面材質 (米色人物圖 + 珍珠箔銀色反光)
-        const backMaterial = new THREE.MeshPhysicalMaterial({
-            map: backMap,               // 人物圖案
-            color: 0xF5F5DC,            // 米色底
-            
-            // 珍珠箔銀光：Metalness 中等，使用 HDR 圖控制反光區域
-            metalness: 0.5,             // 中等金屬度 (銀色珍珠感)
+    };
 
-            // 反光貼圖控制：圖中顏色深的區域會較粗糙，顏色淺的區域較光滑
-            roughnessMap: backHdr, 
-            roughness: 0.6,             // 基礎粗糙度，讓整體材質柔和
+    loadTexture(FILE_PATHS.FRONT_HDR, 'Front HDR', (t) => { frontHdrTex = t; });
+    loadTexture(FILE_PATHS.BACK_BASE, 'Back Base', (t) => { backBaseTex = t; t.colorSpace = THREE.SRGBColorSpace; });
+    loadTexture(FILE_PATHS.BACK_HDR , 'Back HDR', (t) => { backHdrTex = t; });
+    loadTexture(FILE_PATHS.ENV_MAP, 'Env Map', null, true); 
+
+    // ==================== 卡片本體 (材質修正) ====================
+    let cardMesh;
+    function createCard() {
+        const geo = new THREE.BoxGeometry(4.36, 2.97, 0.015);
+        
+        // 紙張顏色
+        const DEEP_RED = 0x550000; 
+        
+        // 修正 1: 將米白底色調亮
+        const LIGHT_BASE = 0xFFFDE7; // 象牙白
+        const STAMP_COLOR_FRONT = 0xCC9933; // 深金色 (燙金)
+
+        // 1. 側面材質 (深色、霧面紙張)
+        const sideMat = new THREE.MeshPhysicalMaterial({ 
+            color: DEEP_RED, 
+            metalness: 0.0, 
+            roughness: 1.0, 
+            envMapIntensity: 0.1 
         });
 
-        const materials = [
-            sideMaterial, sideMaterial, sideMaterial, sideMaterial,
-            frontMaterial, // Front (Index 4)
-            backMaterial   // Back (Index 5)
-        ];
+        // 2. 正面材質 (深紅色紙張 + 質感燙金凹陷)
+        const frontMat = new THREE.MeshPhysicalMaterial({
+            color: DEEP_RED,
+            metalness: 0.0,
+            roughness: 1.0, // 霧面紙張
+            
+            // 燙金 (Emissive 模擬)
+            emissive: STAMP_COLOR_FRONT,
+            emissiveMap: frontHdrTex,
+            emissiveIntensity: 0.8, 
 
-        cardMesh = new THREE.Mesh(geometry, materials);
-        cardMesh.scale.set(0.01, 0.01, 0.01);
+            // 壓凹效果
+            bumpMap: frontHdrTex,
+            bumpScale: -0.015, 
+            
+            envMapIntensity: 0.1, 
+        });
+
+        // 3. 背面材質 (霧面底圖 + 局部銀色反光)
+        const backMat = new THREE.MeshPhysicalMaterial({
+            map: backBaseTex,
+            // 修正 1: 調整基底色到較亮的米白
+            color: LIGHT_BASE,
+            
+            // 修正 2: 確保全圖不反射
+            metalness: 0.0,
+            roughness: 1.0, // 基礎為全霧面
+            
+            // Clearcoat (清漆層) 來模擬局部的銀色燙印反光
+            clearcoatMap: backHdrTex,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.15, // 調整到更光滑一點點
+
+            // 修正 2: 僅讓清漆層反射環境光 (Clearcoat的反光強度與 envMapIntensity 相關)
+            // 將 envMapIntensity 保持低值，但 Clearcoat 本身會利用這個值
+            envMapIntensity: 1.5,
+        });
+
+        // 組合卡片
+        cardMesh = new THREE.Mesh(geo, [
+            sideMat, sideMat, sideMat, sideMat, 
+            frontMat, // 正面
+            backMat   // 背面
+        ]);
+
+        cardMesh.scale.set(0.01,0.01,0.01);
         scene.add(cardMesh);
+        window.cardMesh = cardMesh; 
     }
+
+    // ==================== 其餘功能 (不變) ====================
     
-    // --- 倒數計時器 ---
-    function startCountdown() {
-        // ... (程式碼與前版相同) ...
-        const countdownEl = document.getElementById('countdown');
-        const updateCountdown = () => {
-            const now = new Date().getTime();
-            const distance = weddingDate - now;
-
-            if (distance < 0) {
-                countdownEl.innerHTML = "💖 婚禮進行中！";
-                return;
-            }
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            countdownEl.innerHTML = `聖誕婚禮倒數：${days} 天 ${hours} 小時 ${minutes} 分 ${seconds} 秒`;
-        };
-
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
+    // 雪花
+    const snowGeo = new THREE.BufferGeometry();
+    const vertices = [];
+    for(let i=0;i<800;i++){
+        vertices.push(THREE.MathUtils.randFloatSpread(40), THREE.MathUtils.randFloat(0,30), THREE.MathUtils.randFloatSpread(40));
     }
+    snowGeo.setAttribute('position', new THREE.Float32BufferAttribute(vertices,3));
+    const snow = new THREE.Points(snowGeo, new THREE.PointsMaterial({color:0xffffff,size:0.14,transparent:true,opacity:0.9}));
+    scene.add(snow);
 
-    // --- 聖誕雪花粒子系統 (與前版相同) ---
-    function createSnowflakes() {
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
-
-        for (let i = 0; i < SNOWFLAKE_COUNT; i++) {
-            const x = THREE.MathUtils.randFloatSpread(SNOWFLAKE_RANGE * 2);
-            const y = THREE.MathUtils.randFloat(0, SNOWFLAKE_RANGE);
-            const z = THREE.MathUtils.randFloatSpread(SNOWFLAKE_RANGE * 2);
-            vertices.push(x, y, z);
+    function animateSnow(){
+        const pos = snow.geometry.attributes.position.array;
+        for(let i=1;i<pos.length;i+=3){
+            pos[i] -= 0.015;
+            if(pos[i] < -15) pos[i] = 30;
         }
-
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-
-        const material = new THREE.PointsMaterial({
-            color: 0xffffff, size: 0.1, transparent: true, opacity: 0.7, depthWrite: false 
-        });
-
-        snowflakeSystem = new THREE.Points(geometry, material);
-        scene.add(snowflakeSystem);
+        snow.geometry.attributes.position.needsUpdate = true;
+        requestAnimationFrame(animateSnow);
     }
-    
-    // --- 點擊事件處理 (與前版相同) ---
-    function onCardClick(event) {
-        if (!cardMesh || !controls.enabled) return;
+    animateSnow();
 
-        const pointer = new THREE.Vector2();
-        pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-        pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-        const raycaster = new THREE.Raycaster();
-        raycaster.setFromCamera(pointer, camera);
-
-        const intersects = raycaster.intersectObject(cardMesh);
-
-        if (intersects.length > 0) {
-            document.getElementById('info-modal').style.display = 'flex';
-        }
-    }
-
-    // --- 心動瞬間進場動畫 (與前版相同) ---
-    function animateIntro() {
-        const duration = 1500;
-        const startTime = Date.now();
-        
-        const introLoop = () => {
-            const elapsedTime = Date.now() - startTime;
-            const t = Math.min(1, elapsedTime / duration);
-
-            const scale = 0.01 + t * (1 - 0.01);
-            cardMesh.scale.set(scale, scale, scale);
-
-            const rotationY = Math.PI * 2 * (1 - Math.cos(t * Math.PI) / 2);
-
-            cardMesh.rotation.y = rotationY;
-
-            if (t < 1) {
-                requestAnimationFrame(introLoop);
-            } else {
-                controls.enabled = true;
-            }
+    // 進場動畫
+    function animateIntro(){
+        if (!cardMesh) return;
+        const start = Date.now();
+        const loop = ()=>{
+            const t = Math.min(1,(Date.now()-start)/1800);
+            const s = 0.01 + t*0.99;
+            cardMesh.scale.set(s,s,s);
+            cardMesh.rotation.y = t * Math.PI * 4;
+            if(t<1) requestAnimationFrame(loop);
+            else{ cardMesh.scale.set(1,1,1); controls.enabled=true; }
         };
-
         controls.enabled = false;
-        requestAnimationFrame(introLoop);
-    }
-    
-    // --- 渲染主循環 (雪花飄落與自動旋轉) ---
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        if (snowflakeSystem) {
-            const positions = snowflakeSystem.geometry.attributes.position.array;
-            for (let i = 1; i < positions.length; i += 3) {
-                positions[i] -= 0.01; 
-                
-                if (positions[i] < -SNOWFLAKE_RANGE) {
-                    positions[i] = SNOWFLAKE_RANGE;
-                    positions[i - 1] = THREE.MathUtils.randFloatSpread(SNOWFLAKE_RANGE * 2); 
-                    positions[i + 1] = THREE.MathUtils.randFloatSpread(SNOWFLAKE_RANGE * 2); 
-                }
-            }
-            snowflakeSystem.geometry.attributes.position.needsUpdate = true;
-        }
-        
-        if (cardMesh && controls.enabled && !controls.isRotating) {
-            cardMesh.rotation.y += 0.0005; 
-        }
-        
-        controls.update();
-        renderer.render(scene, camera);
+        loop();
     }
 
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+    // 主迴圈
+    function animate(){
+        requestAnimationFrame(animate);
+        if(cardMesh && controls.enabled) cardMesh.rotation.y += 0.0008;
+        controls.update();
+        renderer.render(scene,camera);
     }
+
+    // 倒數計時
+    const cd = document.getElementById('countdown');
+    setInterval(()=>{
+        const diff = weddingDate - Date.now();
+        if(diff<0){ cd.innerHTML="今天就是我們的聖誕婚禮！"; return; }
+        const d=Math.floor(diff/(1e3*60*60*24));
+        const h=Math.floor((diff%(1e3*60*60*24))/(1e3*60*60));
+        const m=Math.floor((diff%(1e3*60*60))/(1e3*60));
+        const s=Math.floor((diff%(1e3*60))/1e3);
+        cd.innerHTML=`聖誕婚禮倒數：${d}天 ${h}小時 ${m}分 ${s}秒 ❤️`;
+    },1000);
+
+    // 彈窗控制邏輯
+    const infoModal = document.getElementById('info-modal');
+    document.getElementById('info-btn').onclick = ()=> {
+        infoModal.style.display='flex';
+        setTimeout(()=>infoModal.classList.add('show'), 10); 
+    };
+    const closeInfo = ()=> {
+        infoModal.classList.remove('show');
+        setTimeout(()=>infoModal.style.display='none', 300); 
+    };
+    document.querySelector('.close-btn').onclick = closeInfo;
+    infoModal.onclick = e=> {if(e.target===e.currentTarget) closeInfo();};
+
+    window.addEventListener('resize',()=>{
+        camera.aspect = innerWidth/innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth,innerHeight);
+    });
 </script>
 </body>
 </html>
